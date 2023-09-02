@@ -1,0 +1,50 @@
+<div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+  <div class="carousel-inner">
+    <ng-container *ngFor="let b of upcomingMoviesResult;let i=index">
+      <div class="carousel-item" data-bs-interval="10000" [ngClass]="{'active':i==0}">
+        <img [src]="'https://image.tmdb.org/t/p/original/' + b.backdropPath" class="d-block w-100"
+          [routerLink]="['/movie',b.movieId]">
+        <div class="carousel-caption d-none d-md-block">
+          <h2>{{b.originalTitle}}</h2>
+          <p>{{b.overview}}</p>
+        </div>
+
+      </div>
+    </ng-container>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+
+<div class="contain mt-3 p-4">
+  <div class="row">
+    <h3 class="text-white">Popular Movies</h3>
+    <div class="posters">
+      <ng-container *ngFor="let r of recommendedMoviesResult">
+
+        <img src="https://image.tmdb.org/t/p/original/{{r.posterPath}}" class="rowimg largeposter"
+          [routerLink]="['/movie',r.movieId]">
+      </ng-container>
+
+    </div>
+  </div>
+  <div class="row">
+    <ng-container *ngFor="let key of Object.keys(recommendedMovieCards)">
+      <h3 class="text-white">{{key}}</h3>
+      <div class="posters">
+        <ng-container *ngFor="let movie of recommendedMovieCards?.[key]">
+          <img src="https://image.tmdb.org/t/p/original/{{movie?.['posterPath']}}" class="rowimg largeposter"
+            [routerLink]="['/movie',movie?.['movieId']]">
+        </ng-container>
+      </div>
+    </ng-container>
+  </div>
+
+</div>
+<app-footer></app-footer>

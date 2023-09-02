@@ -1,0 +1,41 @@
+<nav class="navbar justify-content-between">
+    <a class="navbar-brand p-2" [routerLink]="['/admin-user']">Movie App</a>
+    <a class="navbar-brand1" [routerLink]="['']">Home</a>
+
+    <a class="navbar-brand1" [routerLink]="['/movie']">Movies</a>
+
+    <mat-icon class="navbar-brand ms-auto" [routerLink]="['/search']">search</mat-icon>
+    <div class="username text-white" *ngIf="window.sessionStorage.getItem('token')!=null">{{userDisplayName}}</div>
+
+    <form class="form-inline">
+
+        <div class="profile-logo dropstart">
+            <img *ngIf="window.sessionStorage.getItem('token')==null" class="btn dropdown-toggle"
+                data-bs-toggle="dropdown"
+                src="data:image/jpeg;base64,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">
+            <img *ngIf="window.sessionStorage.getItem('token')!=null" class="btn dropdown-toggle"
+                data-bs-toggle="dropdown" [src]="'http://34.83.1.21/api/v1/image' | imageAuth | async" />
+
+
+            <ul class="dropdown-menu dropdown-menu-dark">
+                <li><a class="dropdown-item" *ngIf="window.sessionStorage.getItem('token')!=null"
+                        (click)="openDialog()">My Profile</a></li>
+
+                <li><a class="dropdown-item" [routerLink]="['/admin-user']" *ngIf="userRole=='ADMIN'">Admin</a></li>
+                <li><a class="dropdown-item" [routerLink]="['/signup']"
+                        *ngIf="window.sessionStorage.getItem('token')==null">Sign Up</a></li>
+                <li><a class="dropdown-item" [routerLink]="['/signin']"
+                        *ngIf="window.sessionStorage.getItem('token')==null">Log In</a></li>
+                <li><a class="dropdown-item" [routerLink]="['/notification']"
+                        *ngIf="window.sessionStorage.getItem('token')!=null">Notification</a></li>
+                <li><a class="dropdown-item" [routerLink]="['/user-favourite']"
+                        *ngIf="window.sessionStorage.getItem('token')!=null">Favourite List</a></li>
+                <hr *ngIf="window.sessionStorage.getItem('token')!=null">
+                <li><a class="dropdown-item" (click)="logout()"
+                        *ngIf="window.sessionStorage.getItem('token')!=null">LogOut</a></li>
+
+            </ul>
+
+        </div>
+    </form>
+</nav>

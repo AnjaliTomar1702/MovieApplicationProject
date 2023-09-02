@@ -1,0 +1,63 @@
+<div class="contain mt-5">
+    <div class="row p-5">
+        <div class="col-lg-2">
+            <img class="posterImage" src="https://image.tmdb.org/t/p/original/{{movie.posterPath}}">
+
+
+            <!-- add and delete from favourite -->
+            <a (click)="delete(movie.movieId)" *ngIf="movie.movieId | favAlreadyAdded: true | async">
+                <mat-icon>favorite</mat-icon>
+                <h3 class="text-white">Favourite</h3>
+            </a>
+            <a (click)="add()" class="text-white" *ngIf="movie.movieId | favAlreadyAdded: false | async">
+                <mat-icon>favorite_outline</mat-icon>
+                <h3 class="text-white">Favourite</h3>
+
+            </a>
+            <!-- set notification -->
+            <a color="accent"(click)="addNotification()" *ngIf="Date.parse(this.movie?.releaseDate) > Date.now()">
+                <mat-icon  class="material-symbols-outlined">notifications_outline</mat-icon>
+                <h3 class="text-white">Notification</h3>
+
+            </a>
+        </div>
+        <!-- show trailers -->
+        <div class="col-lg-10 mt-5 p-4">
+            <h1 class="mt-2 mb-2">{{movie.originalTitle}}</h1>
+            <hr class="text-white">
+            <p class="mt-2 mb-3">{{movie.overview}}</p>
+            <h1 class="mt-2 mb-2">{{movie.releaseDate}}</h1>
+
+            <button mat-button (click)="openDialog(trailer.key)">Watch Trailer</button>
+
+
+
+            <div class="mt-4 p-4">
+                <h2 class="text-white">Top Cast</h2>
+
+                <div class="row">
+                    <div class="col-lg-4" *ngFor="let c of casts">
+                        <div class="row">
+
+                            <div class="col-lg-10">
+                                <h3>{{c.name}}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <h2 class="text-white" *ngIf="review!=null">Review</h2>
+                   <div *ngFor="let rev of review">
+                    <h2 class="text-white">
+                        <img class="author-image" src="assets\blank-profile-picture.webp">
+                        {{rev.author}}</h2>
+                    <p class="text-white">{{rev.content}}</p>
+                    <h4 class="text-white">{{rev.createdAt}}</h4>
+
+                   </div>
+            </div>
+        </div>
+    </div>
+
+    <app-footer></app-footer>

@@ -1,0 +1,16 @@
+<div class="container py-5 h-100">
+
+  <form class="example-form" (ngSubmit)="upload()">
+    <h2 class="text-white">Edit Profile</h2>
+
+    <img [src]="url | imageAuth | async" />
+
+    <input type="file" id="imageUpload" class="form-control" accept="image/*" style="display: none;"
+      (change)="onFilechange($event)">
+
+    <label class="form-label" for="imageUpload" class="btn">
+      <mat-icon>edit_square</mat-icon></label>
+    <br><br>
+    <button type="submit" mat-raised-button class="btn btn-primary btn-block mb-4">Upload</button>
+  </form>
+</div>

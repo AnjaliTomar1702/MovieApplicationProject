@@ -1,0 +1,138 @@
+# google-cloud-deploy
+
+server:
+  port: 8080
+  error:
+    include-message: always
+  reactive:
+    session:
+      cookie:
+        name: SESSION_${spring.application.name}
+
+spring:
+  config:
+    activate:
+      on-profile: "google-cloud-deploy"
+  application:
+    name: api-gateway
+  main:
+    web-application-type: reactive
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+            '[/**]':
+              allowedOrigins: "http://localhost:4200"
+              allowedHeaders:
+                - content-type
+                - authorization
+              allowedMethods: "*"
+  data:
+    redis:
+      host: 10.96.0.15
+      port: 6379
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://10.96.0.11:8761/eureka, http://10.96.0.12:8761/eureka
+    fetchRegistry: true
+    registerWithEureka: true
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.application.instance_id:${random.value}}
+    statusPageUrlPath: http://34.83.1.21/api/v1/admin/${MY_POD_IP}/swagger-ui.html
+    preferIpAddress: true
+
+springdoc:
+  api-docs:
+    path: /api/v1/admin/${MY_POD_IP}/v3/api-docs
+  show-actuator: true
+  swagger-ui:
+    path: /api/v1/admin/${MY_POD_IP}/swagger-ui.html
+    disable-swagger-default-url: true
+
+management:
+  endpoints:
+    enabled-by-default: true
+    gateway:
+      enabled: true
+    web:
+      base-path: /api/v1/admin/${MY_POD_IP}/actuator
+      exposure:
+        include: "*"
+
+logging:
+  file:
+    name: ./logs/api-gateway.log
+#  logback:
+#    rollingpolicy:
+#      max-file-size: 10MB
+
+---
+# docker
+
+server:
+  port: 8080
+  error:
+    include-message: always
+
+spring:
+  config:
+    activate:
+      on-profile: "docker"
+  application:
+    name: api-gateway
+  main:
+    web-application-type: reactive
+  #    allow-bean-definition-overriding: true
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedHeaders:
+              - content-type
+              - authorization
+            allowedMethods: "*"
+#  data:
+#    redis:
+#      host: redis
+#      port: 6379
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka:8761/eureka
+    fetchRegistry: true
+    registerWithEureka: true
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.application.instance_id:${random.value}}
+    statusPageUrlPath: http://34.83.1.21/api/v1/admin/${MY_POD_IP}/swagger-ui.html
+
+springdoc:
+  api-docs:
+    path: /api/v1/admin/${MY_POD_IP}/v3/api-docs
+  show-actuator: true
+  swagger-ui:
+    path: /api/v1/admin/${MY_POD_IP}/swagger-ui.html
+    disable-swagger-default-url: true
+
+management:
+  endpoints:
+    enabled-by-default: true
+    gateway:
+      enabled: true
+    web:
+      base-path: /api/v1/admin/${MY_POD_IP}/actuator
+      exposure:
+        include: "*"
+  #      cors:
+  #        allowed-origins: "http://localhost:4200"
+  #        allowed-methods: GET,POST
+
+logging:
+  file:
+    name: ./logs/api-gateway.log
+
+

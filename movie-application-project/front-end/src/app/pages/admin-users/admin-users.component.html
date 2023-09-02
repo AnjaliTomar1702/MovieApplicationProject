@@ -1,0 +1,95 @@
+<!-- <mat-tab-group>
+  <mat-tab label="Users list"> Users list </mat-tab>
+  <mat-tab label="Eureka"> Eureka link </mat-tab>
+</mat-tab-group> -->
+<!-- <iframe style="min-height:98vh" width="100%" src="http://localhost:4200/" (load)="hijackIframe($event)" allowfullscreen></iframe> -->
+<!-- <img [src]="'http://34.83.1.21/api/v1/image' | imageAuth | async" /> -->
+<div class="container-lg top-margin">
+<mat-tab-group>
+  <mat-tab label="Users list">
+  <!-- <h1 style="color: deeppink;">Users list</h1> -->
+  <div class="expanded-group">
+    <input type="text" class="form-control me-5 my-5" [formControl]="user" placeholder="Search Users">
+    <button mat-raised-button class="me-5" color="primary" (click)="search()">Search</button>
+  </div>
+  <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="mat-elevation-z8">
+
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>ID</th>
+      <td mat-cell *matCellDef="let element"> {{element.id}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef>Email</th>
+      <td mat-cell *matCellDef="let element"> {{element.email}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="enabled">
+      <th mat-header-cell *matHeaderCellDef>Enabled</th>
+      <td mat-cell *matCellDef="let element"><mat-checkbox [checked]="element.enabled" disabled
+          class="example-margin"></mat-checkbox></td>
+    </ng-container>
+
+    <ng-container matColumnDef="roles">
+      <th mat-header-cell *matHeaderCellDef>Roles</th>
+      <td mat-cell *matCellDef="let element">
+        {{element.roles | arrayCombineSubstring}}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="expand">
+      <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+      <td mat-cell *matCellDef="let element">
+        <button mat-icon-button aria-label="expand row"
+          (click)="(expandedElement = expandedElement === element ? null : element); $event.stopPropagation(); loadRowDetails(element)">
+          <mat-icon *ngIf="expandedElement !== element">keyboard_arrow_down</mat-icon>
+          <mat-icon *ngIf="expandedElement === element">keyboard_arrow_up</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="expandedDetail">
+      <td mat-cell *matCellDef="let element" [attr.colspan]="columnsToDisplayWithExpand.length">
+        <div [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
+          <div class="expanded-group" [formGroup]="changedDatabaseUser">
+            <div>ID : {{element.id}}</div>
+            <div>Email : {{element.email}}</div>
+            <div>Enabled : <mat-checkbox [formControl]="changedDatabaseUser.controls?.['enabled']"
+                [checked]="changedDatabaseUser.controls?.['enabled'].value"></mat-checkbox></div>
+            <!-- <div>Account Expiry Date : {{element.accountExpiryDate}}</div>
+            <div>Not Locked : <mat-checkbox
+                [formControl]="changedDatabaseUser.controls?.['accountNonLocked']"></mat-checkbox></div>
+            <div>Credentials Expiry Date : {{element.credentialsExpiryDate}}</div> -->
+            <mat-form-field appearance="fill">
+              <mat-label>Roles</mat-label>
+              <mat-select multiple [formControl]="changedDatabaseUser.controls?.['roles']" [compareWith]="compareWith">
+                <mat-option *ngFor="let role of allRoles" [value]="role">{{role.name | slice: 5}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="expanded-group-middle mb-4">
+            <button mat-raised-button color="primary" (click)="submit()"
+              [disabled]="changedDatabaseUser?.pristine">Save</button>
+          </div>
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+    <tr mat-row *matRowDef="let element; columns: columnsToDisplayWithExpand;" class="example-element-row"
+      [class.example-expanded-row]="expandedElement === element"
+      (click)="expandedElement = expandedElement === element ? null : element">
+    </tr>
+    <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+  </table>
+  <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons aria-label="Select page of users">
+  </mat-paginator>
+</mat-tab>
+<mat-tab label="Services">
+  <div class="container">
+    <button mat-raised-button color="primary" (click)="refreshIframe()">Refresh</button>
+      <iframe id="eureka" style="min-height:98vh" width="100%" (load)="hijackIframe($event)" src="http://34.83.1.21/eureka" name="eureka" title="Eureka" allowfullscreen></iframe> 
+</div>
+</mat-tab>
+</mat-tab-group>
+</div>

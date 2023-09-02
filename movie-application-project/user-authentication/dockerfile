@@ -1,0 +1,10 @@
+FROM bellsoft/liberica-openjdk-alpine:17
+#- size 207 MB best
+#FROM eclipse-temurin:17-jre-alpine - size 249 MB
+#FROM openjdk:17 - size 553 MB
+#FROM openjdk:17-jdk-slim - size 489 MB
+WORKDIR usr/src
+ADD ./target/user-authentication-0.0.1-SNAPSHOT.jar /usr/src/user-authentication-0.0.1-SNAPSHOT.jar
+ADD ./keystore /usr/src/keystore
+ADD ./truststore /usr/src/truststore
+ENTRYPOINT ["java","-jar","user-authentication-0.0.1-SNAPSHOT.jar"]

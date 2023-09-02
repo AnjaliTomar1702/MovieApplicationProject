@@ -1,0 +1,8 @@
+<div class="row itemsBlock">
+  <h2 class="text-white">Favourite List</h2>
+  <hr class="text-white">
+
+  <div *ngFor="let r of movie" class="col-md-2 col-sm-3 col-5">
+    <img src="https://image.tmdb.org/t/p/original/{{r.posterPath}}" class="rowimg largeposter"
+      [routerLink]="['/movie',r.movieId]">
+  </div>

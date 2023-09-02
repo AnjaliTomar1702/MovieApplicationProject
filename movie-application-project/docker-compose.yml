@@ -1,0 +1,97 @@
+version: "3.5"
+services:
+  mysqlservice:
+    image: mysql:5.5
+    ports:
+      - 3306:3306
+    container_name: mysql-container
+    networks:
+      - my-network
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USERNAME: user
+      MYSQL_PASSWORD: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+
+  mongodbservice:
+    image: mongo:latest
+    container_name: mongo-container
+    networks:
+      - my-network
+    ports:
+      - 27017:27017
+
+  user-authentication-service:
+    container_name: user-authentication
+    build: UserAuthenticationService/
+    networks:
+      - my-network
+    ports:
+      - 8080:8080
+    depends_on:
+      - mysqlservice
+      - eurekaServer
+      - cloudapiservice
+    restart: always
+
+  user-movie-service:
+    container_name: user-movie
+    build: UserMovieService/
+    networks:
+      - my-network
+    ports:
+      - 8080:8080
+    depends_on:
+      - mongodbservice
+      - eurekaServer
+      - cloudapiservice
+    restart: always
+
+  recommended-service:
+    container_name: user-movie-service
+    build: UserRecommendService/
+    networks:
+      - my-network
+    ports:
+      - 8080:8080
+    depends_on:
+      - mongodbservice
+      - eurekaServer
+      - cloudapiservice
+    restart: always
+
+
+
+
+
+  cloud-api-service:
+    image: api-gateway
+    build: SpringCloudAPIGateway/
+    restart: always
+    networks:
+      - my-network
+    ports:
+      - 8080:8080
+    environment:
+      API_GATEWAY_PORT: 9000
+      EUREKA_SERVER_IP: localhost
+      EUREKA_SERVER_PORT: 8761
+    depends_on:
+      - eurekaServer
+
+
+  eureka-Server:
+    image: eureka-server-1
+    build: EurekaServer/
+    restart: always
+    networks:
+      - my-network
+    environment:
+      EUREKA_SERVER_PORT: 8761
+    ports:
+      - 8761:8761
+
+networks:
+  my-network:
+    driver: bridge
+

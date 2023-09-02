@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-app-api-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: movie-app-api-gateway
+  template:
+    metadata:
+      name: movie-app-api-gateway-pod
+      labels:
+        name: movie-app-api-gateway
+    spec:
+      containers:
+        - name: movie-app-api-gateway-service
+          image: us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-api-gateway/movie-app-api-gateway:latest
+#          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: SPRING_PROFILES_ACTIVE
+              value: "google-cloud-deploy"

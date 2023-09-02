@@ -1,0 +1,39 @@
+.row {
+   margin-top: 100px;
+}
+
+.rowimg {
+   border-radius: 20px;
+   max-height: 200px;
+   transition: transform 450ms;
+   padding: 5px;
+}
+
+.rowimg:hover {
+   transform: scale(1.08);
+   cursor: pointer;
+}
+
+.largeposter {
+   max-height: 300px;
+}
+
+h2 {
+   font-weight: 500;
+   margin-left: 30px;
+}
+
+hr {
+   margin-left: 35px;
+
+}
+
+@media only screen and (max-width: 600px) {
+   .rowimg {
+      border-radius: 20px;
+      height: 200px;
+      transition: transform 450ms;
+      padding: 5px;
+      margin-left: 40px;
+   }
+}

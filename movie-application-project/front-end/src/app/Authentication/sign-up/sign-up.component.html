@@ -1,0 +1,108 @@
+<section class="background-radial-gradient overflow-hidden">
+
+  <div class="container px-4 py-5 px-md-5 text-center text-lg-start my-5">
+    <div class="row gx-lg-5 align-items-center mb-5">
+      <div class="col-lg-6 mb-5 mb-lg-0" style="z-index: 10">
+        <h1 class="my-5 display-5 fw-bold ls-tight" style="color: hsl(218, 81%, 95%)">
+          Watch Latest Movies <br />
+          <span style="color: hsl(218, 81%, 75%)">Anytime Anywhere</span>
+        </h1>
+        <p class="mb-4 opacity-70" style="color: hsl(218, 81%, 85%)">
+          Register with your email and password <br>to watch the latest trending movies
+        </p>
+      </div>
+
+      <div class="col-lg-6 mb-5 mb-lg-0 position-relative">
+        <div id="radius-shape-1" class="position-absolute rounded-circle shadow-5-strong"></div>
+        <div id="radius-shape-2" class="position-absolute shadow-5-strong"></div>
+
+        <div class="card bg-glass">
+          <div class="card-body px-4 py-5 px-md-5">
+            <form [formGroup]="register" (ngSubmit)="signup()">
+
+              <small class="text-danger">{{msg}}</small>
+
+              <div class="form mb-4">
+                <!-- Image input -->
+                <img [src]="url" style="width: 150px;  height: 150px;">
+
+                <input type="file" id="imageUpload" class="form-control" accept="image/*" style="display: none;"
+                  (change)="onFileSelected($event)">
+                <br><br>
+                <label class="form-label" for="imageUpload" class="btn btn-outline-light btn-block mb-4"
+                  style=" color:black;">Upload Image</label>
+              </div>
+              <!-- Email input -->
+              <div class="form-outline mb-4">
+                <input type="email" id="form3Example3" class="form-control" placeholder="Email" formControlName="email"
+                  [ngClass]="{ 'is-invalid': submitted && registerFormControl['email'].errors }" />
+                <div *ngIf="submitted && registerFormControl['email'].errors" class="invalid-feedback">
+                  <div *ngIf="registerFormControl['email'].errors['required']">Email is required</div>
+                  <div *ngIf="registerFormControl['email'].errors['email']">Email is invalid</div>
+                </div>
+              </div>
+
+              <!-- Password input -->
+              <div class="form-outline mb-4">
+                <input type="password" id="form3Example4" class="form-control" placeholder="Password"
+                  formControlName="password"
+                  [ngClass]="{ 'is-invalid': submitted && registerFormControl['password'].errors }" />
+                <div *ngIf="submitted && registerFormControl['password'].errors" class="invalid-feedback">
+                  <div *ngIf="registerFormControl['password'].errors['required']">Password is required</div>
+                  <div *ngIf="registerFormControl['password'].errors['minlength']">
+                    Password must be at least 6 characters
+                  </div>
+                  <div *ngIf="registerFormControl['password'].errors['maxlength']">
+                    Username must not exceed 40 characters
+                  </div>
+                </div>
+
+              </div>
+              <!-- confirm password -->
+              <div class="form-outline mb-4">
+                <input type="password" id="form3Example4" class="form-control" placeholder="Confirm password"
+                  formControlName="confirmPassword"
+                  [ngClass]="{ 'is-invalid': submitted && registerFormControl['confirmPassword'].errors }" />
+                <div *ngIf="submitted && registerFormControl['confirmPassword'].errors" class="invalid-feedback">
+                  <div *ngIf="registerFormControl['confirmPassword'].errors['required']">
+                    Confirm Password is required
+                  </div>
+
+                  <div *ngIf="registerFormControl['confirmPassword'].errors['passwordMismatch']">
+                    Confirm Password does not match
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- Checkbox -->
+              <div class="form-check d-flex justify-content-center mb-4">
+                <input class="form-check-input me-2" type="checkbox" value="" id="form2Example33"
+                  formControlName="acceptTerms"
+                  [ngClass]="{ 'is-invalid': submitted && registerFormControl['acceptTerms'].errors }" />
+
+                <label class="form-check-label" for="form2Example33">
+                  I agree all statements in <a href="#!" class="text-body"><u>Terms of service</u></a>
+                </label>
+
+                <!-- <div *ngIf="submitted && f['acceptTerms'].errors" class="invalid-feedback">
+                  Accept Terms is required
+                </div> -->
+
+              </div>
+
+              <!-- Submit button -->
+              <button type="submit" class="btn btn-primary btn-block mb-4" style=" margin-left: 4px; width: 100%; ">
+                Sign up
+              </button>
+
+
+            </form>
+            <h3>Have already an account <a class="text-white" [routerLink]="['/signin']">Sign In</a></h3>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

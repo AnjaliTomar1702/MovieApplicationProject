@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-app-redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: movie-app-redis
+  template:
+    metadata:
+      name: movie-app-redis-pod
+      labels:
+        name: movie-app-redis
+    spec:
+      containers:
+        - name: movie-app-redis-service
+          image: redis
+#          imagePullPolicy: Never   # So it doesn't pull the image from remote registry
+          ports:
+            - containerPort: 6379
+          env:
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP

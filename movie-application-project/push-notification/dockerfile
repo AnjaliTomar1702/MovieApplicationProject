@@ -1,0 +1,4 @@
+FROM bellsoft/liberica-openjdk-alpine:17
+WORKDIR usr/src
+ADD ./target/push-notification-0.0.1-SNAPSHOT.jar /usr/src/push-notification-0.0.1-SNAPSHOT.jar
+ENTRYPOINT ["java","-jar","push-notification-0.0.1-SNAPSHOT.jar"]

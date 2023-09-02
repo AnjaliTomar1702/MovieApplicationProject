@@ -1,0 +1,9 @@
+.top-margin{
+   margin-top: 100px;
+}
+
+.mat-column-button {
+   width: 50px;
+   text-align: center;
+   font-weight: bold;
+ }

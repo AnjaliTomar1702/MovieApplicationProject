@@ -1,0 +1,29 @@
+#FROM google/cloud-sdk
+#
+#ADD ./aerial-venture-386206-b11b4f81d05e.json /gcloud/config/aerial-venture-386206-b11b4f81d05e.json
+#
+#RUN gcloud auth activate-service-account ci-cd-935@aerial-venture-386206.iam.gserviceaccount.com  --key-file=/gcloud/config/aerial-venture-386206-b11b4f81d05e.json --project=aerial-venture-386206
+#
+#RUN gcloud container clusters get-credentials movie-app-cluster --zone us-west1-a --project aerial-venture-386206
+#
+#RUN apt update && apt upgrade
+#
+#RUN apt install -y openjdk-17-jdk
+#
+#RUN apt update && apt upgrade
+#
+#RUN apt install -y maven
+
+FROM maven:3.6.3-openjdk-17
+
+RUN curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-432.0.0-linux-x86_64.tar.gz
+
+RUN mkdir -p /usr/local/gcloud
+
+RUN tar -C /usr/local/gcloud -xvf ./google-cloud-cli-432.0.0-linux-x86_64.tar.gz
+
+RUN /usr/local/gcloud/google-cloud-sdk/install.sh
+
+RUN export PATH=/usr/local/gcloud/google-cloud-sdk/bin:$PATH
+
+ADD ./aerial-venture-386206-b11b4f81d05e.json /usr/local/gcloud/aerial-venture-386206-b11b4f81d05e.json

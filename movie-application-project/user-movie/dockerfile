@@ -1,0 +1,8 @@
+FROM bellsoft/liberica-openjdk-alpine:17
+#- size 207 MB best
+#FROM eclipse-temurin:17-jre-alpine - size 249 MB
+#FROM openjdk:17 - size 553 MB
+#FROM openjdk:17-jdk-slim - size 489 MB
+WORKDIR usr/src
+ADD ./target/user-movie-0.0.1-SNAPSHOT.jar /usr/src/user-movie-0.0.1-SNAPSHOT.jar
+ENTRYPOINT ["java","-jar","user-movie-0.0.1-SNAPSHOT.jar"]

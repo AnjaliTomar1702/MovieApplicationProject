@@ -1,0 +1,233 @@
+#google-cloud-deploy
+
+server:
+  port: 8080
+  error:
+    include-message: always
+  #servlet:
+   # session:
+    #  timeout:
+  servlet:
+    session:
+      cookie:
+        same-site: strict
+
+spring:
+  config:
+    activate:
+      on-profile: "google-cloud-deploy"
+  application:
+    name: user-authentication
+  datasource:
+    url: jdbc:mysql://35.184.175.226:3306/users_authentication?createDatabaseIfNotExist=true&verifyServerCertificate=true&useSSL=true&requireSSL=true&clientCertificateKeyStoreUrl=file:keystore&clientCertificateKeyStorePassword=mypassword&trustCertificateKeyStoreUrl=file:truststore&trustCertificateKeyStorePassword=mypassword
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    ssl: true
+  mvc:
+    format:
+      date: yyyy-MM-dd
+  rabbitmq:
+    host: 10.96.0.14
+    port: 5672
+    username: admin
+    password: admin
+#  data:
+#    redis:
+#      host: 10.96.0.15
+#      port: 6379
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://10.96.0.11:8761/eureka, http://10.96.0.12:8761/eureka
+    fetchRegistry: true
+    registerWithEureka: true
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.application.instance_id:${random.value}}
+    statusPageUrlPath: http://34.83.1.21/api/v1/admin/${MY_POD_IP}/swagger-ui.html
+    preferIpAddress: true
+
+springdoc:
+  api-docs:
+    path: /api/v1/admin/${MY_POD_IP}/v3/api-docs
+  show-actuator: true
+  swagger-ui:
+    path: /api/v1/admin/${MY_POD_IP}/swagger-ui.html
+    disable-swagger-default-url: true
+
+management:
+  endpoints:
+    enabled-by-default: true
+    web:
+      base-path: /api/v1/admin/${MY_POD_IP}/actuator
+      exposure:
+        include: "*"
+
+logging:
+  file:
+    name: ./logs/user-authentication.log
+#  logback:
+#    rollingpolicy:
+#      max-file-size: 10MB
+
+---
+# docker
+
+server:
+  port: 8080
+  error:
+    include-message: always
+
+spring:
+  config:
+    activate:
+      on-profile: "docker"
+  application:
+    name: user-authentication
+  datasource:
+    #    url: jdbc:mysql://35.184.175.226:3306/users_authentication?createDatabaseIfNotExist=true&verifyServerCertificate=true&useSSL=true&requireSSL=true&clientCertificateKeyStoreUrl=file:keystore&clientCertificateKeyStorePassword=mypassword&trustCertificateKeyStoreUrl=file:truststore&trustCertificateKeyStorePassword=mypassword
+    url: ${MYSQL_DATABASE_URL}
+    #url: jdbc:mysql://localhost:3306/users_authentication?createDatabaseIfNotExist=true
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    ssl: true
+  mvc:
+    format:
+      date: yyyy-MM-dd
+  data:
+    redis:
+      host: redis
+      port: 6379
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka:8761/eureka
+    fetchRegistry: true
+    registerWithEureka: true
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.application.instance_id:${random.value}}
+    statusPageUrlPath: http://localhost/api/v1/admin/user-authentication/actuator
+
+springdoc:
+  show-actuator: true
+  use-management-port: true
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  server:
+    port: 8090
+  endpoints:
+    enabled-by-default: true
+    web:
+      base-path: /api/v1/admin/user-authentication/actuator
+      exposure:
+        include: "*"
+  #      cors: # according to docs this is disabled by default unless values specified
+  #        allowed-origins: "http://localhost:4200"
+  #        allowed-methods: GET,POST
+  security:
+    enabled: false
+    sessions: never
+
+logging:
+  file:
+    name: ./logs/user-authentication.log
+---
+# test
+
+server:
+  port: 8080
+  error:
+    include-message: always
+    #servlet:
+    # session:
+    #  timeout:
+  servlet:
+    session:
+      cookie:
+        same-site: strict
+
+spring:
+  config:
+    activate:
+      on-profile: "test"
+  application:
+    name: user-authentication
+  datasource:
+#    url: jdbc:mysql://35.184.175.226:3306/users_authentication?createDatabaseIfNotExist=true&verifyServerCertificate=true&useSSL=true&requireSSL=true&clientCertificateKeyStoreUrl=file:keystore&clientCertificateKeyStorePassword=mypassword&trustCertificateKeyStoreUrl=file:truststore&trustCertificateKeyStorePassword=mypassword
+    #url: ${MYSQL_DATABASE_URL}
+    url: jdbc:mysql://localhost:3306/users_authentication?createDatabaseIfNotExist=true
+    username: root
+    password: joinal@123
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
+    show-sql: true
+    ssl: true
+  mvc:
+    format:
+      date: yyyy-MM-dd
+
+eureka:
+  client:
+    enabled: false
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+    fetchRegistry: true
+    registerWithEureka: true
+  instance:
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.name}:${spring.application.instance_id:${random.value}}
+    statusPageUrlPath: http://localhost:8090/api/v1/admin/actuator
+    preferIpAddress: true
+
+springdoc:
+  api-docs:
+    path: /api/v1/admin/v3/api-docs
+  show-actuator: true
+#  use-management-port: true
+  swagger-ui:
+    path: /api/v1/admin/swagger-ui.html
+    disable-swagger-default-url: true
+    #    configUrl: /api/v1/admin/v3/api-docs/swagger-config
+
+
+management:
+#  server:
+#    port: 8080
+#    base-path: /api/v1/admin/actuator
+  endpoints:
+    enabled-by-default: true
+    web:
+      base-path: /api/v1/admin/actuator
+      exposure:
+        include: "*"
+#      cors: # according to docs this is disabled by default unless values specified
+#        allowed-origins: "http://localhost:4200"
+#        allowed-methods: GET,POST
+#  security:
+#    enabled: false
+#    sessions: never
+
+logging:
+  file:
+    name: ./logs/user-authentication.log
+#  logback:
+#    rollingpolicy:
+#      max-file-size: 10MB
+
+
+
+

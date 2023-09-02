@@ -1,0 +1,56 @@
+<div class="container justify-content-center">
+    <div class="row">
+        <div class="col-md-8">
+
+            <div class="input-group mb-3">
+                <input type="text" class="form-control input-text" placeholder="Search Movies...."
+                    [(ngModel)]="searchStr">
+                <div class="input-group-append">
+                    <button [ngClass]="{'btn':true, 'btn-search':searchStr,'btn-search-disabled':!searchStr}"
+                        [disabled]="!searchStr" class="btn btn-md" type="button"
+                        (click)="search()">Search</button>
+                </div>
+
+            </div>
+          
+
+        </div>
+    </div>
+    <select name="genre" id="genre" (change)="searchByGenreIdQuery($event)">
+        <option selected>Choose a Genre</option>
+        <option *ngFor="let genre of genreList" [value]="genre.id">{{genre.name}}</option>
+    </select>
+
+    <select name="year" id="year" (change)="searchByYear($event)">
+        <option selected>Choose a year</option>
+        <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+    </select>
+</div>
+
+<br>
+<div class="row itemsBlock">
+
+    <div *ngFor="let s of searchResult" class="col-md-3 col-sm-3 col-5">
+        <img src="https://image.tmdb.org/t/p/original/{{s.posterPath}}" class="rowimg largeposter"
+            [routerLink]="['/movie',s.movieId]">
+    </div>
+
+
+    <div class="row itemsBlock" *ngIf="genreResult!=null">
+        <!-- <h2 *ngIf="genreResult!=null">Search by Genre:</h2> -->
+        <br>
+        <div *ngFor="let genre of genreResult" class="col-md-3 col-sm-3 col-5">
+
+            <img src="https://image.tmdb.org/t/p/original/{{genre?.['posterPath']}}" class="rowimg largeposter"
+                [routerLink]="['/movie',genre.movieId]">
+        </div>
+
+        <div class="row itemsBlock" *ngIf="yearResult!=null">
+            <!-- <h2 *ngIf="yearResult!=null">Search by Year:</h2> -->
+
+            <br>
+            <div *ngFor="let year of yearResult" class="col-md-3 col-sm-3 col-5">
+
+                <img src="https://image.tmdb.org/t/p/original/{{year?.['posterPath']}}" class="rowimg largeposter"
+                    [routerLink]="['/movie',year.movieId]">
+            </div>

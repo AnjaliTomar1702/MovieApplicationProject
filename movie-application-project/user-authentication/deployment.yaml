@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-app-user-authentication
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: movie-app-user-authentication
+  template:
+    metadata:
+      name: movie-app-user-authentication-pod
+      labels:
+        name: movie-app-user-authentication
+    spec:
+      containers:
+        - name: movie-app-user-authentication-service
+          image: us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-user-authentication/movie-app-user-authentication:latest
+#          imagePullPolicy: Never   # So it doesn't pull the image from remote registry
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: SPRING_PROFILES_ACTIVE
+              value: "google-cloud-deploy"

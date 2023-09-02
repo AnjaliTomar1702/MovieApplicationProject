@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-app-eureka-server-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: movie-app-eureka-server-2
+  template:
+    metadata:
+      name: movie-app-eureka-server-2-pod
+      labels:
+        name: movie-app-eureka-server-2
+    spec:
+      containers:
+        - name: movie-app-eureka-server-2-service
+          image: us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-eureka-server-2/movie-app-eureka-server-2:latest   # The one built and tagged locally
+#          imagePullPolicy: Never   # So it doesn't pull the image from remote registry
+          ports:
+            - containerPort: 8080
+          env:
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: SPRING_PROFILES_ACTIVE
+              value: "google-cloud-deploy"

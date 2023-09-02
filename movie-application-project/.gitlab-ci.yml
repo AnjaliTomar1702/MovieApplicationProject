@@ -1,0 +1,518 @@
+image: joinal/google-cloud-sdk-movie-app:latest
+
+services:
+  - name: docker:20-dind
+    alias: docker
+    command: ["--tls=false"]
+#    variables:
+#      HEALTHCHECK_TCP_PORT: "2375"
+
+stages:
+  - package-front-end
+  - deploy-front-end
+#  - build-api-gateway
+#  - test-api-gateway
+  - package-api-gateway
+  - deploy-api-gateway
+#  - build-user-authentication
+#  - test-user-authentication
+  - package-user-authentication
+  - deploy-user-authentication
+#  - build-eureka-server-1
+#  - test-eureka-server-1
+  - package-eureka-server-1
+  - deploy-eureka-server-1
+#  - build-eureka-server-2
+#  - test-eureka-server-2
+  - package-eureka-server-2
+  - deploy-eureka-server-2
+#  - build-push-notification
+#  - test-push-notification
+  - package-push-notification
+  - deploy-push-notification
+#  - build-recommended-service
+#  - test-recommended-service
+  - package-recommended-service
+  - deploy-recommended-service
+#  - build-user-movie
+#  - test-user-movie
+  - package-user-movie
+  - deploy-user-movie
+
+variables:
+  DOCKER_HOST: tcp://docker:2375
+  DOCKER_TLS_CERTDIR: ""
+  DOCKER_DRIVER: overlay2
+#  FF_NETWORK_PER_BUILD: "true"
+
+package-front-end-job:
+  image: node:16-alpine
+  stage: package-front-end
+  script:
+    - cd front-end
+    - npm install
+    - npm run build
+    - cd ..
+  artifacts:
+    paths:
+      - "front-end/dist/"
+  rules:
+    - changes:
+        - "front-end/**/*"
+        - "api-gateway/**/*"
+  allow_failure: true
+
+deploy-front-end-job:
+  image: alpine
+  stage: deploy-front-end
+  script:
+    - rm -r -f ./api-gateway/src/main/resources/static
+    - mv ./front-end/dist/movie-app ./api-gateway/src/main/resources/static
+  artifacts:
+    paths:
+      - "api-gateway/src/main/resources/static/"
+  rules:
+    - changes:
+        - "front-end/**/*"
+        - "api-gateway/**/*"
+  allow_failure: true
+  needs: ['package-front-end-job']
+
+#build-api-gateway-job:
+#  stage: build-api-gateway
+#  script:
+#    - echo "Hello, $GITLAB_USER_LOGIN!"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd api-gateway
+#    - mvn clean
+#    - mvn compile
+#    - cd ..
+#  artifacts:
+#    paths:
+#      - "api-gateway/src/main/resources/static/"
+#  rules:
+#    - changes:
+#        - "api-gateway/**/*"
+#        - "front-end/**/*"
+#  allow_failure: true
+#
+#test-api-gateway-job:
+#  stage: test-api-gateway
+#  script:
+#    - echo "This job tests something"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd api-gateway
+#    - mvn test
+#  artifacts:
+#    paths:
+#      - "api-gateway/src/main/resources/static/"
+#  rules:
+#    - changes:
+#        - "api-gateway/**/*"
+#        - "front-end/**/*"
+#  allow_failure: true
+#  needs: ['build-api-gateway-job']
+
+package-api-gateway-job:
+  stage: package-api-gateway
+  script:
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    - cd api-gateway
+    - mvn package
+  artifacts:
+    paths:
+      - "api-gateway/target/"
+  rules:
+    - changes:
+        - "api-gateway/**/*"
+        - "front-end/**/*"
+  allow_failure: true
+#  needs: ['build-api-gateway-job', 'test-api-gateway-job']
+
+
+deploy-api-gateway-job:
+  stage: deploy-api-gateway
+  script:
+    - cd api-gateway
+    - docker build -t us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-api-gateway/movie-app-api-gateway .
+    - gcloud auth configure-docker us-west1-docker.pkg.dev
+    - docker push us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-api-gateway/movie-app-api-gateway
+    - sleep 5
+    - gcloud container images list-tags us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-api-gateway/movie-app-api-gateway --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete "us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-api-gateway/movie-app-api-gateway@{arg}" --quiet
+    - kubectl rollout restart deploy movie-app-api-gateway
+    - cd ..
+  rules:
+    - changes:
+        - "api-gateway/**/*"
+        - "front-end/**/*"
+  allow_failure: true
+#  needs: ['build-api-gateway-job', 'test-api-gateway-job', 'package-api-gateway-job']
+  needs: ['package-api-gateway-job']
+
+#build-user-authentication-job:
+#  stage: build-user-authentication
+#  script:
+#    - echo "Hello, $GITLAB_USER_LOGIN!"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd user-authentication
+#    - mvn clean
+#    - mvn compile
+#    - cd ..
+#  rules:
+#    - changes:
+#        - "user-authentication/**/*"
+#  allow_failure: true
+#
+#test-user-authentication-job:
+#  stage: test-user-authentication
+#  script:
+#    - echo "This job tests something"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd user-authentication
+#    - mvn test
+#  rules:
+#    - changes:
+#        - "user-authentication/**/*"
+#  allow_failure: true
+#  needs: ['build-user-authentication-job']
+
+package-user-authentication-job:
+  stage: package-user-authentication
+  script:
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    - cd user-authentication
+    - mvn package
+  artifacts:
+    paths:
+      - "user-authentication/target/"
+  rules:
+    - changes:
+        - "user-authentication/**/*"
+  allow_failure: true
+#  needs: ['build-user-authentication-job', 'test-user-authentication-job']
+
+
+deploy-user-authentication-job:
+  stage: deploy-user-authentication
+  script:
+    - cd user-authentication
+    - docker build -t us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-user-authentication/movie-app-user-authentication .
+    - gcloud auth configure-docker us-west1-docker.pkg.dev
+    - docker push us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-user-authentication/movie-app-user-authentication
+    - sleep 5
+    - gcloud container images list-tags us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-user-authentication/movie-app-user-authentication --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete "us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-user-authentication/movie-app-user-authentication@{arg}" --quiet
+    - kubectl rollout restart deploy movie-app-user-authentication
+    - cd ..
+  rules:
+    - changes:
+        - "user-authentication/**/*"
+  allow_failure: true
+#  needs: ['build-user-authentication-job', 'test-user-authentication-job', 'package-user-authentication-job']
+  needs: ['package-user-authentication-job']
+
+
+#build-eureka-server-1-job:
+#  stage: build-eureka-server-1
+#  script:
+#    - echo "Hello, $GITLAB_USER_LOGIN!"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd eureka-server-1
+#    - mvn clean
+#    - mvn compile
+#    - cd ..
+#  rules:
+#    - changes:
+#        - "eureka-server-1/**/*"
+#  allow_failure: true
+#
+#test-eureka-server-1-job:
+#  stage: test-eureka-server-1
+#  script:
+#    - echo "This job tests something"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd eureka-server-1
+#    - mvn test
+#  rules:
+#    - changes:
+#        - "eureka-server-1/**/*"
+#  allow_failure: true
+#  needs: ['build-eureka-server-1-job']
+
+package-eureka-server-1-job:
+  stage: package-eureka-server-1
+  script:
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    - cd eureka-server-1
+    - mvn package
+  artifacts:
+    paths:
+      - "eureka-server-1/target/"
+  rules:
+    - changes:
+        - "eureka-server-1/**/*"
+  allow_failure: true
+#  needs: ['build-eureka-server-1-job', 'test-eureka-server-1-job']
+
+
+deploy-eureka-server-1-job:
+  stage: deploy-eureka-server-1
+  script:
+    - cd eureka-server-1
+    - docker build -t us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-eureka-server-1/movie-app-eureka-server-1 .
+    - gcloud auth configure-docker us-west1-docker.pkg.dev
+    - docker push us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-eureka-server-1/movie-app-eureka-server-1
+    - sleep 5
+    - gcloud container images list-tags us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-eureka-server-1/movie-app-eureka-server-1 --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete "us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-eureka-server-1/movie-app-eureka-server-1@{arg}" --quiet
+    - kubectl rollout restart deploy movie-app-eureka-server-1
+    - cd ..
+  rules:
+    - changes:
+        - "eureka-server-1/**/*"
+  allow_failure: true
+#  needs: ['build-eureka-server-1-job', 'test-eureka-server-1-job', 'package-eureka-server-1-job']
+  needs: ['package-eureka-server-1-job']
+
+#build-eureka-server-2-job:
+#  stage: build-eureka-server-2
+#  script:
+#    - echo "Hello, $GITLAB_USER_LOGIN!"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd eureka-server-2
+#    - mvn clean
+#    - mvn compile
+#    - cd ..
+#  rules:
+#    - changes:
+#        - "eureka-server-2/**/*"
+#  allow_failure: true
+#
+#test-eureka-server-2-job:
+#  stage: test-eureka-server-2
+#  script:
+#    - echo "This job tests something"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd eureka-server-2
+#    - mvn test
+#  rules:
+#    - changes:
+#        - "eureka-server-2/**/*"
+#  allow_failure: true
+#  needs: ['build-eureka-server-2-job']
+
+package-eureka-server-2-job:
+  stage: package-eureka-server-2
+  script:
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    - cd eureka-server-2
+    - mvn package
+  artifacts:
+    paths:
+      - "eureka-server-2/target/"
+  rules:
+    - changes:
+        - "eureka-server-2/**/*"
+  allow_failure: true
+#  needs: ['build-eureka-server-2-job', 'test-eureka-server-2-job']
+
+
+deploy-eureka-server-2-job:
+  stage: deploy-eureka-server-2
+  script:
+    - cd eureka-server-2
+    - docker build -t us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-eureka-server-2/movie-app-eureka-server-2 .
+    - gcloud auth configure-docker us-west1-docker.pkg.dev
+    - docker push us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-eureka-server-2/movie-app-eureka-server-2
+    - sleep 5
+    - gcloud container images list-tags us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-eureka-server-2/movie-app-eureka-server-2 --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete "us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-eureka-server-2/movie-app-eureka-server-2@{arg}" --quiet
+    - kubectl rollout restart deploy movie-app-eureka-server-2
+    - cd ..
+  rules:
+    - changes:
+        - "eureka-server-2/**/*"
+  allow_failure: true
+#  needs: ['build-eureka-server-2-job', 'test-eureka-server-2-job', 'package-eureka-server-2-job']
+  needs: ['package-eureka-server-2-job']
+
+#build-push-notification-job:
+#  stage: build-push-notification
+#  script:
+#    - echo "Hello, $GITLAB_USER_LOGIN!"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd push-notification
+#    - mvn clean
+#    - mvn compile
+#    - cd ..
+#  rules:
+#    - changes:
+#        - "push-notification/**/*"
+#  allow_failure: true
+#
+#test-push-notification-job:
+#  stage: test-push-notification
+#  script:
+#    - echo "This job tests something"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd push-notification
+#    - mvn test
+#  rules:
+#    - changes:
+#        - "push-notification/**/*"
+#  allow_failure: true
+#  needs: ['build-push-notification-job']
+
+package-push-notification-job:
+  stage: package-push-notification
+  script:
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    - cd push-notification
+    - mvn package
+  artifacts:
+    paths:
+      - "push-notification/target/"
+  rules:
+    - changes:
+        - "push-notification/**/*"
+  allow_failure: true
+#  needs: ['build-push-notification-job', 'test-push-notification-job']
+
+
+deploy-push-notification-job:
+  stage: deploy-push-notification
+  script:
+    - cd push-notification
+    - docker build -t us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-push-notification/movie-app-push-notification .
+    - gcloud auth configure-docker us-west1-docker.pkg.dev
+    - docker push us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-push-notification/movie-app-push-notification
+    - sleep 5
+    - gcloud container images list-tags us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-push-notification/movie-app-push-notification --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete "us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-push-notification/movie-app-push-notification@{arg}" --quiet
+    - kubectl rollout restart deploy movie-app-push-notification
+    - cd ..
+  rules:
+    - changes:
+        - "push-notification/**/*"
+  allow_failure: true
+#  needs: ['build-push-notification-job', 'test-push-notification-job', 'package-push-notification-job']
+  needs: ['package-push-notification-job']
+
+#build-recommended-service-job:
+#  stage: build-recommended-service
+#  script:
+#    - echo "Hello, $GITLAB_USER_LOGIN!"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd recommended-service
+#    - mvn clean
+#    - mvn compile
+#    - cd ..
+#  rules:
+#    - changes:
+#        - "recommended-service/**/*"
+#  allow_failure: true
+#
+#test-recommended-service-job:
+#  stage: test-recommended-service
+#  script:
+#    - echo "This job tests something"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd recommended-service
+#    - mvn test
+#  rules:
+#    - changes:
+#        - "recommended-service/**/*"
+#  allow_failure: true
+#  needs: ['build-recommended-service-job']
+
+package-recommended-service-job:
+  stage: package-recommended-service
+  script:
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    - cd recommended-service
+    - mvn package
+  artifacts:
+    paths:
+      - "recommended-service/target/"
+  rules:
+    - changes:
+        - "recommended-service/**/*"
+  allow_failure: true
+#  needs: ['build-recommended-service-job', 'test-recommended-service-job']
+
+
+deploy-recommended-service-job:
+  stage: deploy-recommended-service
+  script:
+    - cd recommended-service
+    - docker build -t us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-recommended-service/movie-app-recommended-service .
+    - gcloud auth configure-docker us-west1-docker.pkg.dev
+    - docker push us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-recommended-service/movie-app-recommended-service
+    - sleep 5
+    - gcloud container images list-tags us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-recommended-service/movie-app-recommended-service --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete "us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-recommended-service/movie-app-recommended-service@{arg}" --quiet
+    - kubectl rollout restart deploy movie-app-recommended-service
+    - cd ..
+  rules:
+    - changes:
+        - "recommended-service/**/*"
+  allow_failure: true
+#  needs: ['build-recommended-service-job', 'test-recommended-service-job', 'package-recommended-service-job']
+  needs: ['package-recommended-service-job']
+
+
+#build-user-movie-job:
+#  stage: build-user-movie
+#  script:
+#    - echo "Hello, $GITLAB_USER_LOGIN!"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd user-movie
+#    - mvn clean
+#    - mvn compile
+#    - cd ..
+#  rules:
+#    - changes:
+#        - "user-movie/**/*"
+#  allow_failure: true
+#
+#test-user-movie-job:
+#  stage: test-user-movie
+#  script:
+#    - echo "This job tests something"
+#    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+#    - cd user-movie
+#    - mvn test
+#  rules:
+#    - changes:
+#        - "user-movie/**/*"
+#  allow_failure: true
+#  needs: ['build-user-movie-job']
+
+package-user-movie-job:
+  stage: package-user-movie
+  script:
+    - export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+    - cd user-movie
+    - mvn package
+  artifacts:
+    paths:
+      - "user-movie/target/"
+  rules:
+    - changes:
+        - "user-movie/**/*"
+  allow_failure: true
+#  needs: ['build-user-movie-job', 'test-user-movie-job']
+
+deploy-user-movie-job:
+  stage: deploy-user-movie
+  script:
+    - cd user-movie
+    - docker build -t us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-user-movie/movie-app-user-movie .
+    - gcloud auth configure-docker us-west1-docker.pkg.dev
+    - docker push us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-user-movie/movie-app-user-movie
+    - sleep 5
+    - gcloud container images list-tags us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-user-movie/movie-app-user-movie --filter='-tags:*' --format='get(digest)' --limit=unlimited | xargs -I {arg} gcloud container images delete "us-west1-docker.pkg.dev/aerial-venture-386206/movie-app-user-movie/movie-app-user-movie@{arg}" --quiet
+    - kubectl rollout restart deploy movie-app-user-movie
+    - cd ..
+  rules:
+    - changes:
+        - "user-movie/**/*"
+  allow_failure: true
+#  needs: ['build-user-movie-job', 'test-user-movie-job', 'package-user-movie-job']
+  needs: ['package-user-movie-job']
+

@@ -1,0 +1,43 @@
+a {
+    color: #dd3675;
+    font-weight: 700;
+    text-decoration: none;
+    padding-left: 20px;
+}
+
+mat-icon {
+    color: #dd3675;
+
+}
+.navbar{
+    background-color: #000000ef;
+
+}
+@media only screen and (max-width: 600px) {
+    .username{
+    display: none;
+    }
+}
+img {
+    width: 66px;
+    height: 52px;
+    border-radius: 50%;
+    left: 30px;
+}
+
+.navbar-brand1 {
+    font-weight: 700;
+    font-size: medium;
+}
+
+.navbar-brand:hover {
+    color: #dd3675;
+
+}
+
+.navbar-brand1:hover {
+    color: #dd3675;
+    border-radius: 5px;
+    border: #ffffff;
+    border-color: #ffffff;
+}
